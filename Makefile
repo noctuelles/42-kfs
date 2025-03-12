@@ -22,7 +22,8 @@ CFLAGS = -fno-builtin \
 		 -nostdlib \
 		 -nodefaultlibs \
 		 -std=c++11 \
-		 -ffreestanding
+		 -ffreestanding \
+		 -g3
 
 CLIBS  = -lgcc
 
