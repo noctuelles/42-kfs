@@ -1,5 +1,2 @@
-objs
-kfs.bin
-kfs.iso
-iso
-.vscode
+sysroot
+*.iso

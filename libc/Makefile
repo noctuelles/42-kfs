@@ -3,6 +3,14 @@ OBJ_DIR=obj
 INC_DIR=include
 
 CFLAGS?=-O2 -g
+CPPFLAGS?=
+LDFLAGS?=
+
+DESTDIR?=
+PREFIX?=/usr/local
+EXEC_PREFIX?=$(PREFIX)
+INCLUDEDIR?=$(PREFIX)/include
+LIBDIR?=$(EXEC_PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Werror
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
@@ -38,6 +46,16 @@ fclean: clean
 
 re: fclean all
 
+install: install-headers install-libs
+
+install-headers:
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)
+	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
+
+install-libs: $(BINARIES)
+	mkdir -p $(DESTDIR)$(LIBDIR)
+	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
@@ -46,4 +64,4 @@ $(OBJ_DIR)/%.libk.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re install install-headers install-libs
