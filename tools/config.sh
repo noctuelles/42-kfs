@@ -3,10 +3,12 @@ PROJECTS="libc kernel"
 
 export MAKE=${MAKE:-make}
 export HOST=i686-elf
+export NAME=kfs
 
 export AR=${HOST}-ar
 export AS=${HOST}-as
 export CC=${HOST}-gcc
+export CXX=${HOST}-g++
 
 export PREFIX=/usr
 export EXEC_PREFIX=$PREFIX

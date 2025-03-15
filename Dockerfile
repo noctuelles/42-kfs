@@ -6,3 +6,5 @@ RUN apt-get install -y build-essential nasm xorriso grub-pc-bin grub-common
 
 VOLUME [ "/root/env" ]
 WORKDIR /root/env
+
+CMD ["/bin/bash"]

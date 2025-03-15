@@ -1,3 +1,3 @@
-void kernelMain() {
+extern "C" void kernelMain() {
     return;
 }

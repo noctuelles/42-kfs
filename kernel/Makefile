@@ -14,24 +14,36 @@ INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Werror
 CPPFLAGS:=$(CPPFLAGS) -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -D__is_kernel -Iinclude
-LIBS:=$(LIBS) -nostdlib -lgcc
+LIBS:=$(LIBS) -nostdlib -lgcc -lk
 
 KERNEL_CPP_SRCS=Kernel.cpp
 KERNEL_ASM_SRCS=Boot.S
+KERNEL_C_RUNTIME_SRCS=crti.S \
+					  crtn.S
 
 KERNEL_CPP_OBJS=$(addprefix $(OBJ_DIR)/,$(KERNEL_CPP_SRCS:.cpp=.o))
 KERNEL_ASM_OBJS=$(addprefix $(OBJ_DIR)/,$(KERNEL_ASM_SRCS:.S=.o))
 
 KERNEL_OBJS=$(KERNEL_CPP_OBJS) $(KERNEL_ASM_OBJS)
 
-LINK_LIST=$(KERNEL_OBJS)
+OBJS=$(OBJ_DIR)/Crti.o \
+$(OBJ_DIR)/crtbegin.o \
+$(KERNEL_OBJS) \
+$(OBJ_DIR)/crtend.o \
+$(OBJ_DIR)/Crtn.o
 
-NAME=kfs
+LINK_LIST=$(LDFLAGS) \
+$(OBJ_DIR)/Crti.o \
+$(OBJ_DIR)/crtbegin.o \
+$(KERNEL_OBJS) \
+$(LIBS) \
+$(OBJ_DIR)/crtend.o \
+$(OBJ_DIR)/Crtn.o
 
 all: $(NAME)
 
-$(NAME): $(LINK_LIST) linker.ld
-	$(CC) -T linker.ld -o $@ $(CFLAGS) $(KERNEL_OBJS)
+$(NAME): $(OBJS) linker.ld
+	$(CC) -T linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
 	grub-file --is-x86-multiboot $(NAME) 
 
 clean:
@@ -44,11 +56,14 @@ re: fclean all
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CC) -MD -c $< -o $@ -std=c++11 $(CFLAGS) $(CPPFLAGS)
+	$(CXX) -MD -c $< -o $@ -std=c++11 $(CFLAGS) $(CPPFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+
+$(OBJ_DIR)/crtbegin.o $(OBJ_DIR)/crtend.o:
+	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 install: install-headers install-kernel
 
