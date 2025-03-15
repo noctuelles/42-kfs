@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
 namespace IO
 {
     class VGATerminal
@@ -36,6 +35,7 @@ namespace IO
 
         void putString(const char *str, Color fg = Color::LIGHT_GREY, Color bg = Color::BLACK);
         void putChar(unsigned char c, Color fg = Color::LIGHT_GREY, Color bg = Color::BLACK);
+        void putFormat(const char *format, ...);
 
     private:
         size_t row{0};

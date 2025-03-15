@@ -2,7 +2,7 @@ SRC_DIR=src
 OBJ_DIR=obj
 INC_DIR=include
 
-CFLAGS?=-O2 -g
+CFLAGS?=-g
 CPPFLAGS?=
 LDFLAGS?=
 
@@ -22,6 +22,7 @@ FREESTANDING_SRCS=string/strlen.c \
 				  string/memmove.c \
 				  string/memcpy.c \
 				  string/memcmp.c \
+				  string/itoa_base.c \
 				  stdlib/abort.c
 
 FREESTANDING_OBJS=$(addprefix $(OBJ_DIR)/,$(FREESTANDING_SRCS:.c=.o))

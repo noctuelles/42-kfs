@@ -2,6 +2,7 @@
 #define STRING_H
 
 #include <sys/cdefs.h>
+#include <stdint.h>
 
 #include <stddef.h>
 
@@ -15,6 +16,7 @@ extern "C"
     void *memmove(void *, const void *, size_t);
     void *memset(void *, int, size_t);
     size_t strlen(const char *);
+    char *itoa_base(int32_t n, const char *base);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@ SRC_DIR=src
 OBJ_DIR=obj
 INC_DIR=include
 
-CFLAGS?=-O2 -g
+CFLAGS?=-g
 CPPFLAGS?=
 LDFLAGS?=
 
