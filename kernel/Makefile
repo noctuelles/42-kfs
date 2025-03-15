@@ -16,8 +16,11 @@ CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Werror
 CPPFLAGS:=$(CPPFLAGS) -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -D__is_kernel -Iinclude
 LIBS:=$(LIBS) -nostdlib -lgcc -lk
 
-KERNEL_CPP_SRCS=Kernel.cpp
+KERNEL_CPP_SRCS=Kernel.cpp \
+                io/VGATerminal.cpp
+
 KERNEL_ASM_SRCS=Boot.S
+
 KERNEL_C_RUNTIME_SRCS=crti.S \
 					  crtn.S
 

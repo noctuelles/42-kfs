@@ -21,8 +21,10 @@ export CPPFLAGS=''
 
 export SYSROOT="$(pwd)/sysroot"
 export CC="$CC --sysroot=$SYSROOT"
+export CXX="$CXX --sysroot=$SYSROOT"
 
 if echo "$HOST" | grep -Eq -- '-elf($|-)'; then
   export CC="$CC -isystem=$INCLUDEDIR"
+  export CXX="$CXX -isystem=$INCLUDEDIR"
 fi
 

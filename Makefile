@@ -13,6 +13,6 @@ clean:
 launch:
 	qemu-system-i386 -cdrom $(NAME).iso
 launch-dbg:
-	qemu-system-i386 -s -S -cdrom $(NAME).iso
+	qemu-system-i386 -m 512M -s -S -cdrom $(NAME).iso
 
 .PHONY: build iso clean launch launch-dbg
