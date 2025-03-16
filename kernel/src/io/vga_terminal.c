@@ -55,8 +55,8 @@ void vga_terminal_write(const char *buffer, size_t len)
     }
 }
 
-void vga_terminal_set_attribute(vga_color_t fg, vga_color_t bg)
+void vga_terminal_set_attribute(vga_color_t _fg, vga_color_t _bg)
 {
-    fg = fg;
-    bg = bg;
+    fg = _fg;
+    bg = _bg;
 }
