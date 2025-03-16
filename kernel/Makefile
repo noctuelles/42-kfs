@@ -13,35 +13,35 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Werror
-CPPFLAGS:=$(CPPFLAGS) -fno-builtin -fno-rtti -fno-exceptions -fno-stack-protector -D__is_kernel -Iinclude
+CPPFLAGS:=$(CPPFLAGS) -fno-builtin -fno-stack-protector -D__is_kernel -Iinclude
 LIBS:=$(LIBS) -nostdlib -lgcc -lk
 
-KERNEL_CPP_SRCS=Kernel.cpp \
-                io/VGATerminal.cpp
+KERNEL_CPP_SRCS=kernel.c \
+                io/vga_terminal.c
 
-KERNEL_ASM_SRCS=Boot.S
+KERNEL_ASM_SRCS=boot.S
 
 KERNEL_C_RUNTIME_SRCS=crti.S \
 					  crtn.S
 
-KERNEL_CPP_OBJS=$(addprefix $(OBJ_DIR)/,$(KERNEL_CPP_SRCS:.cpp=.o))
+KERNEL_CPP_OBJS=$(addprefix $(OBJ_DIR)/,$(KERNEL_CPP_SRCS:.c=.o))
 KERNEL_ASM_OBJS=$(addprefix $(OBJ_DIR)/,$(KERNEL_ASM_SRCS:.S=.o))
 
 KERNEL_OBJS=$(KERNEL_CPP_OBJS) $(KERNEL_ASM_OBJS)
 
-OBJS=$(OBJ_DIR)/Crti.o \
+OBJS=$(OBJ_DIR)/crti.o \
 $(OBJ_DIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(OBJ_DIR)/crtend.o \
-$(OBJ_DIR)/Crtn.o
+$(OBJ_DIR)/crtn.o
 
 LINK_LIST=$(LDFLAGS) \
-$(OBJ_DIR)/Crti.o \
+$(OBJ_DIR)/crti.o \
 $(OBJ_DIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(LIBS) \
 $(OBJ_DIR)/crtend.o \
-$(OBJ_DIR)/Crtn.o
+$(OBJ_DIR)/crtn.o
 
 all: $(NAME)
 
@@ -57,9 +57,9 @@ fclean: clean
 
 re: fclean all
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CXX) -MD -c $< -o $@ -std=c++11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)

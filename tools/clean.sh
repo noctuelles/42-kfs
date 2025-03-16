@@ -7,6 +7,7 @@ PROJECTROOT=${PROJECTROOT:-"${TOOLSDIR}/.."}
 . $TOOLSDIR/config.sh
 
 for PROJECT in $PROJECTS; do
-    echo $PROJECT
   (cd $PROJECTROOT/$PROJECT && DESTDIR="$SYSROOT" $MAKE fclean)
 done
+
+rm -rf $SYSROOT

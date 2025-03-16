@@ -25,7 +25,7 @@ _start:
 	pushl %ebx
 	pushl %eax
 	call _init
-	call kernelMain
+	call kernel_main
 	call _fini
 	cli
 1:	hlt

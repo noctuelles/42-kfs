@@ -23,7 +23,10 @@ FREESTANDING_SRCS=string/strlen.c \
 				  string/memcpy.c \
 				  string/memcmp.c \
 				  string/itoa_base.c \
-				  stdlib/abort.c
+				  stdlib/abort.c \
+				  stdio/putchar.c \
+				  stdio/puts.c \
+				  stdio/printf.c
 
 FREESTANDING_OBJS=$(addprefix $(OBJ_DIR)/,$(FREESTANDING_SRCS:.c=.o))
 
