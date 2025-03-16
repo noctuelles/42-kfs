@@ -9,6 +9,7 @@ extern "C"
 #endif
 
     __attribute__((__noreturn__)) void abort(void);
+    int atoi(const char *nptr);
 
 #ifdef __cplusplus
 }

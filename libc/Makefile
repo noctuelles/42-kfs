@@ -24,6 +24,7 @@ FREESTANDING_SRCS=string/strlen.c \
 				  string/memcmp.c \
 				  string/itoa_base.c \
 				  stdlib/abort.c \
+				  stdlib/atoi.c \
 				  stdio/putchar.c \
 				  stdio/puts.c \
 				  stdio/printf.c
