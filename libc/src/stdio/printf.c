@@ -11,10 +11,24 @@ typedef enum flags_e
     LEFT_JUSTIFIED = 1 << 2,
 } flags_t;
 
+typedef enum length_modifier_e
+{
+    NONE,
+    HH,
+    H,
+    L,
+    LL,
+    J,
+    Z,
+    T,
+    L_CAPITAL,
+} length_modifier_t;
+
 typedef struct format_info_s
 {
     flags_t flags;
     int width;
+    length_modifier_t length_modifier;
 } format_info_t;
 
 static int write_string(const char *s)
@@ -66,14 +80,51 @@ static int parse_width(const char **format)
     return width;
 }
 
-static int print_hex(format_info_t *format_info, uint32_t value, bool upper)
+static int parse_length_modifier(const char **format)
+{
+    switch (**format)
+    {
+    case 'h':
+        (*format)++;
+        if (**format == 'h')
+        {
+            (*format)++;
+            return HH;
+        }
+        return H;
+    case 'l':
+        (*format)++;
+        if (**format == 'l')
+        {
+            (*format)++;
+            return LL;
+        }
+        return L;
+    case 'j':
+        (*format)++;
+        return J;
+    case 'z':
+        (*format)++;
+        return Z;
+    case 't':
+        (*format)++;
+        return T;
+    case 'L':
+        (*format)++;
+        return L_CAPITAL;
+    default:
+        return NONE;
+    }
+}
+
+static int print_hex(format_info_t *format_info, uint64_t value, bool upper)
 {
     const char *digits = upper ? "0123456789ABCDEF" : "0123456789abcdef";
     const char *alternate = upper ? "0X" : "0x";
     const char *str = NULL;
     int ret = 0;
 
-    str = itoa_base(value, digits);
+    str = utoa_base(value, digits);
     if (str == NULL)
     {
         return -1;
@@ -150,6 +201,7 @@ int printf(const char *format, ...)
             format++;
             format_info.flags = parse_flags(&format);
             format_info.width = parse_width(&format);
+            format_info.length_modifier = parse_length_modifier(&format);
 
             switch (*format)
             {
@@ -168,11 +220,28 @@ int printf(const char *format, ...)
                 /*TODO: Flags etc.*/
                 print_ret = write_string(itoa_base(va_arg(parameters, int32_t), "0123456789"));
                 break;
+            case 'u':
+                print_ret = write_string(utoa_base(va_arg(parameters, uint32_t), "0123456789"));
+                break;
             case 'x':
-                print_ret = print_hex(&format_info, va_arg(parameters, uint32_t), false);
+                if (format_info.length_modifier == L)
+                {
+                    print_ret = print_hex(&format_info, va_arg(parameters, uint64_t), false);
+                }
+                else
+                {
+                    print_ret = print_hex(&format_info, va_arg(parameters, uint32_t), false);
+                }
                 break;
             case 'X':
-                print_ret = print_hex(&format_info, va_arg(parameters, uint32_t), true);
+                if (format_info.length_modifier == L)
+                {
+                    print_ret = print_hex(&format_info, va_arg(parameters, uint64_t), true);
+                }
+                else
+                {
+                    print_ret = print_hex(&format_info, va_arg(parameters, uint32_t), true);
+                }
                 break;
             }
 

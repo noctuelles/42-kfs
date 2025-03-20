@@ -16,7 +16,8 @@ extern "C"
     void *memmove(void *, const void *, size_t);
     void *memset(void *, int, size_t);
     size_t strlen(const char *);
-    char *itoa_base(int32_t n, const char *base);
+    char *itoa_base(int64_t n, const char *base);
+    char *utoa_base(uint64_t n, const char *base);
 
 #ifdef __cplusplus
 }

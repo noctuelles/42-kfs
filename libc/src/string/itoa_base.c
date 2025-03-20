@@ -2,10 +2,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-static size_t	get_baselen(const char *base)
+static size_t get_baselen(const char *base)
 {
-	size_t	i;
-	size_t	j;
+	size_t i, j;
 
 	i = 0;
 	while (base[i] != '\0')
@@ -18,15 +17,13 @@ static size_t	get_baselen(const char *base)
 				return (0);
 		i++;
 	}
-	if (i == 0 || i == 1)
-		return (0);
-	return (i);
+	return (i > 1) ? i : 0;
 }
 
-static size_t	get_nchar(int32_t n, size_t baselen)
+static size_t get_nchar(int64_t n, size_t baselen)
 {
-	size_t		size;
-	uint32_t	i;
+	size_t size;
+	uint64_t i;
 
 	size = 0;
 	if (n == 0)
@@ -34,7 +31,7 @@ static size_t	get_nchar(int32_t n, size_t baselen)
 	if (n < 0)
 	{
 		size++;
-		i = (uint32_t) - n;
+		i = (uint64_t)(-n);
 	}
 	else
 		i = n;
@@ -46,30 +43,49 @@ static size_t	get_nchar(int32_t n, size_t baselen)
 	return (size);
 }
 
-static void	fillstr(char *str, const char *base, size_t baselen, uint32_t n)
+static void fillstr(char *str, const char *base, size_t baselen, uint64_t n)
 {
 	if (n >= baselen)
 		fillstr(str - 1, base, baselen, n / baselen);
 	*str = base[n % baselen];
 }
 
-char	*itoa_base(int32_t n, const char *base)
+char *itoa_base(int64_t n, const char *base)
 {
-    static char str[512];
-	size_t	baselen;
-	size_t	nchar;
+	static char str[512];
+	size_t baselen;
+	size_t nchar;
 
 	baselen = get_baselen(base);
 	if (!baselen)
 		return (NULL);
 	nchar = get_nchar(n, baselen);
+	if (nchar > sizeof(str))
+		return (NULL);
 	if (n < 0)
 	{
 		str[0] = '-';
-		fillstr(&str[nchar - 1], base, baselen, (uint32_t) - n);
+		fillstr(&str[nchar - 1], base, baselen, (uint64_t)(-n));
 	}
 	else
-		fillstr(&str[nchar - 1], base, baselen, n);
+		fillstr(&str[nchar - 1], base, baselen, (uint64_t)n);
+	str[nchar] = '\0';
+	return (str);
+}
+
+char *utoa_base(uint64_t n, const char *base)
+{
+	static char str[512];
+	size_t baselen;
+	size_t nchar;
+
+	baselen = get_baselen(base);
+	if (!baselen)
+		return (NULL);
+	nchar = get_nchar(n, baselen);
+	if (nchar > sizeof(str))
+		return (NULL);
+	fillstr(&str[nchar - 1], base, baselen, n);
 	str[nchar] = '\0';
 	return (str);
 }
