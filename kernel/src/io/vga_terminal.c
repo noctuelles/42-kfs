@@ -1,4 +1,5 @@
 #include <kernel/io/vga_terminal.h>
+#include <kernel/io/helper.h>
 #include <stddef.h>
 
 static size_t row = 0;
@@ -7,8 +8,22 @@ static uint16_t *buffer = (uint16_t *)0xB8000;
 static uint8_t fg = VGA_COLOR_LIGHT_GREY;
 static uint8_t bg = VGA_COLOR_BLACK;
 
+void vga_enable_cursor()
+{
+
+    output_byte(0x3D4, 0x09);
+    const uint8_t maximum_scan_line = input_byte(0x3D5) & 0x0F;
+
+    output_byte(0x3D4, 0x0A);
+    output_byte(0x3D5, 0);
+
+    output_byte(0x3D4, 0x0B);
+    output_byte(0x3D5, maximum_scan_line);
+}
+
 void vga_terminal_init(void)
 {
+    vga_enable_cursor();
     /* Clear screen buffer. */
     for (size_t y = 0; y < VGA_TERMINAL_HEIGHT; y++)
     {
@@ -35,10 +50,10 @@ void vga_terminal_put_char(unsigned char c)
     {
         column = 0;
         row++;
-        if (row == VGA_TERMINAL_HEIGHT)
-        {
-            /* TODO: scroll. */
-        }
+    }
+    if (row == VGA_TERMINAL_HEIGHT)
+    {
+        // Scroll
     }
 }
 

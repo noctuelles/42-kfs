@@ -14,10 +14,12 @@ INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Werror
 CPPFLAGS:=$(CPPFLAGS) -fno-builtin -fno-stack-protector -D__is_kernel -Iinclude
-LIBS:=$(LIBS) -nostdlib -lgcc -lk
+LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 KERNEL_CPP_SRCS=kernel.c \
-                io/vga_terminal.c
+                io/vga_terminal.c \
+				io/keyboard/ps2_keyboard.c \
+				io/keyboard/layout_qwerty.c
 
 KERNEL_ASM_SRCS=boot.S
 

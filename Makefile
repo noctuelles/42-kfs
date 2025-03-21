@@ -11,8 +11,8 @@ iso:
 clean:
 	@bash -c "$(TOOLS_DIR)/clean.sh"
 launch:
-	qemu-system-i386 -cdrom $(NAME).iso
+	qemu-system-i386 -trace cpu* -cdrom $(NAME).iso
 launch-dbg:
-	qemu-system-i386 -m 512M -s -S -cdrom $(NAME).iso
+	qemu-system-i386  -m 521M -s -S -cdrom $(NAME).iso
 
 .PHONY: build iso clean launch launch-dbg

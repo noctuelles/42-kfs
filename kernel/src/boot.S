@@ -20,10 +20,12 @@ stack_top:
 
 .global _start
 .type _start, @function
+
 _start:
-	mov $stack_top, %esp
+	mov %eax, %ecx
+
 	pushl %ebx
-	pushl %eax
+	pushl %ecx
 	call _init
 	call kernel_main
 	call _fini

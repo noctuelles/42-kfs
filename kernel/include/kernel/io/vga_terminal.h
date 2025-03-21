@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define VGA_TERMINAL_WIDTH 80U
-#define VGA_TERMINAL_HEIGHT 25U
+#define VGA_TERMINAL_WIDTH 80
+#define VGA_TERMINAL_HEIGHT 25
 
 typedef enum vga_color_e
 {
