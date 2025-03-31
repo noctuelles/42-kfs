@@ -17,7 +17,8 @@ CPPFLAGS:=$(CPPFLAGS) -fno-builtin -fno-stack-protector -D__is_kernel -Iinclude
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 KERNEL_CPP_SRCS=kernel.c \
-                io/vga_terminal.c \
+                io/terminal.c \
+                io/console/vga.c \
 				io/keyboard/ps2_keyboard.c \
 				io/keyboard/layout_qwerty.c
 

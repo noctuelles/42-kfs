@@ -1,11 +1,11 @@
 #ifdef __is_libk
-#include <kernel/io/vga_terminal.h>
+#include <kernel/io/terminal.h>
 #endif
 
 int putchar(int c)
 {
 #ifdef __is_libk
-    vga_terminal_write((const char *)&c, sizeof(unsigned char));
+    terminal_write((const unsigned char *)&c, sizeof(unsigned char));
 #else
 /* TODO */
 #endif
