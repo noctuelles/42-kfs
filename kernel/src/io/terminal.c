@@ -17,11 +17,17 @@ static void terminal_putc(unsigned char c) {
             x += 1;
             break;
     }
-
-    if (x == g_console.viewport_col_nbr) {
+    if (x >= g_console.viewport_col_nbr) {
         x = 0;
         y += 1;
     }
+    if (y >= g_console.viewport_row_nbr) {
+        g_console_impl->scroll(&g_console, CONSOLE_SCROLL_UP, 1);
+        x = 0;
+        y -= 1;
+    }
+
+    g_console_impl->set_cursor_pos(&g_console, x, y);
 }
 
 void terminal_init(console_impl_t *console_impl) {
@@ -29,7 +35,7 @@ void terminal_init(console_impl_t *console_impl) {
     y = 0;
 
     console_impl->init(&g_console);
-    console_impl->set_cursor_style(CONSOLE_CURSOR_OFF);
+    console_impl->set_cursor_style(CONSOLE_CURSOR_BLOCK);
     console_impl->set_cursor_pos(&g_console, x, y);
     g_console_impl = console_impl;
 }

@@ -14,6 +14,7 @@ typedef enum console_cursor_e
 {
     CONSOLE_CURSOR_OFF,
     CONSOLE_CURSOR_UNDERLINE,
+    CONSOLE_CURSOR_HALF_BLOCK,
     CONSOLE_CURSOR_BLOCK,
 } console_cursor_t;
 

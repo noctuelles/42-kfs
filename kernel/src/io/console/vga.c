@@ -1,6 +1,6 @@
 /**
  * @file vga.c
- * @brief VGA driver implementation
+ * @brief VGA driver implementation.
  *
  * @see http://www.osdever.net/FreeVGA/vga/vgatext.htm
  */
@@ -11,6 +11,7 @@
 #include <string.h>
 
 #define VGA_COLOR_FRAMEBUFFER_ADDR ((uint16_t *)0xB8000)
+#define VGA_COLOR_FRAMEBUFFER_SIZE 0x8000
 #define VGA_FRAMEBUFFER_WIDTH 80
 #define VGA_FRAMEBUFFER_HEIGHT 25
 
@@ -66,7 +67,7 @@ static void
 vga_set_addr(const console_t *con) {
     uint32_t offset;
 
-    offset = con->viewport_visible_origin - (uintptr_t)g_vga_vram_start;
+    offset = (con->viewport_visible_origin - (uintptr_t)g_vga_vram_start) / 2;
 
     output_byte(VGA_CRTC_ADDR_REG, VGA_START_ADDR_LOW_REG);
     output_byte(VGA_CRTC_DATA_REG, offset & 0xFF);
@@ -90,6 +91,11 @@ vga_set_cursor_style(const console_cursor_t cursor) {
             output_byte(VGA_CRTC_ADDR_REG, VGA_MAXIMUM_SCAN_LINE_REG);
             cursor_scanline_start = 0;
             cursor_scanline_end   = input_byte(VGA_CRTC_DATA_REG) & 0x0F;
+            break;
+        case CONSOLE_CURSOR_HALF_BLOCK:
+            output_byte(VGA_CRTC_ADDR_REG, VGA_MAXIMUM_SCAN_LINE_REG);
+            cursor_scanline_start = 0;
+            cursor_scanline_end   = (input_byte(VGA_CRTC_DATA_REG) & 0x0F) / 2;
             break;
         case CONSOLE_CURSOR_UNDERLINE:
             cursor_scanline_start = 0;
@@ -117,11 +123,13 @@ vga_scroll(console_t *con, console_scroll_dir_t dir, size_t n) {
                 /* If the visible viewport would exceed the VRAM size, wrap around to the beginning of the VRAM. */
                 memcpy(g_vga_vram_start, (const void *)(con->viewport_origin + delta), con->viewport_size - delta);
                 con->viewport_origin = (uintptr_t)g_vga_vram_start;
+                con->viewport_end    = con->viewport_origin + con->viewport_size;
             } else {
                 con->viewport_origin += delta;
+                con->viewport_end += delta;
             }
 
-            /* Clear the bottom of the viewport to make some room. */
+            /* Clear the bottom of the viewport. */
             vga_clear_vram((uint16_t *)(con->viewport_origin + con->viewport_size - delta),
                            (uint16_t *)(con->viewport_origin + con->viewport_size));
             break;
@@ -131,7 +139,6 @@ vga_scroll(console_t *con, console_scroll_dir_t dir, size_t n) {
     }
 
     con->viewport_visible_origin = con->viewport_origin;
-    con->viewport_end            = con->viewport_origin + con->viewport_size;
 
     /*TODO: what about the cursor position ? */
 
@@ -146,7 +153,7 @@ vga_set_cursor_pos(const console_t *con, const size_t x, const size_t y) {
         return false;
     }
 
-    const uint16_t pos = y * con->viewport_row_nbr + x;
+    const uint16_t pos = y * con->viewport_col_nbr + x;
 
     output_byte(VGA_CRTC_ADDR_REG, VGA_CURSOR_LOCATION_LOW_REG);
     output_byte(VGA_CRTC_DATA_REG, pos & 0xFF);
