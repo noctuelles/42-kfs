@@ -100,7 +100,9 @@ vga_set_cursor_style(const console_cursor_t cursor) {
     cursor_start = (cursor == CONSOLE_CURSOR_OFF ? 0x20 : 0x00) | cursor_scanline_start;
     cursor_end   = cursor_scanline_end;
 
-    output_byte(VGA_CRTC_ADDR_REG, cursor_start);
+    output_byte(VGA_CRTC_ADDR_REG, VGA_CURSOR_START_REG);
+    output_byte(VGA_CRTC_DATA_REG, cursor_start);
+    output_byte(VGA_CRTC_ADDR_REG, VGA_CURSOR_END_REG);
     output_byte(VGA_CRTC_DATA_REG, cursor_end);
 }
 
