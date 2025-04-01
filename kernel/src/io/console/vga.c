@@ -10,8 +10,11 @@
 #include <kernel/io/helper.h>
 #include <string.h>
 
-#define VGA_COLOR_FRAMEBUFFER_ADDR ((uint16_t *)0xB8000)
+#define NBR_AVAILABLE_CONSOLE 2
+
+#define VGA_COLOR_FRAMEBUFFER_ADDR 0xB8000
 #define VGA_COLOR_FRAMEBUFFER_SIZE 0x8000
+
 #define VGA_FRAMEBUFFER_WIDTH 80
 #define VGA_FRAMEBUFFER_HEIGHT 25
 
@@ -27,7 +30,6 @@
 #define VGA_CURSOR_LOCATION_LOW_REG 0x0F
 
 #define VGA_ERASE_CHAR (' ' | (VGA_COLOR_LIGHT_GREY << 8))
-
 typedef enum vga_color_e {
     VGA_COLOR_BLACK         = 0,
     VGA_COLOR_BLUE          = 1,
@@ -47,9 +49,12 @@ typedef enum vga_color_e {
     VGA_COLOR_WHITE         = 15,
 } vga_color_t;
 
-static uint16_t *g_vga_vram_start;
-static uint16_t *g_vga_vram_end;
-static uint8_t   g_vga_attribute;
+static uint8_t g_console_buffer[NBR_AVAILABLE_CONSOLE][VGA_COLOR_FRAMEBUFFER_SIZE] = {0};
+static size_t  g_console_buffer_idx                                                = 0;
+
+static uint16_t *g_vga_vram_start = (uint16_t *)VGA_COLOR_FRAMEBUFFER_ADDR;
+static uint16_t *g_vga_vram_end   = (uint16_t *)(VGA_COLOR_FRAMEBUFFER_ADDR + VGA_COLOR_FRAMEBUFFER_SIZE);
+static uint8_t   g_vga_attribute  = VGA_COLOR_LIGHT_GREY | VGA_COLOR_BLACK << 4;
 
 static inline uint16_t
 vga_get_pair(unsigned char c) {
@@ -113,10 +118,11 @@ vga_set_cursor_style(const console_cursor_t cursor) {
 }
 
 static bool
-vga_scroll(console_t *con, console_scroll_dir_t dir, size_t n) {
+vga_scroll(console_t *con, console_scroll_dir_t dir) {
     size_t delta;
 
-    delta = n * con->viewport_row_size;
+    /* Scroll one line down or up. */
+    delta = con->viewport_row_size;
     switch (dir) {
         case CONSOLE_SCROLL_UP:
             if (con->viewport_end + delta > (uintptr_t)g_vga_vram_end) {
@@ -137,23 +143,19 @@ vga_scroll(console_t *con, console_scroll_dir_t dir, size_t n) {
             /* NOT IMPLEMENTED */
             return false;
     }
-
     con->viewport_visible_origin = con->viewport_origin;
-
-    /*TODO: what about the cursor position ? */
-
     vga_set_addr(con);
-
     return true;
 }
 
 static bool
-vga_set_cursor_pos(const console_t *con, const size_t x, const size_t y) {
+vga_set_cursor_pos(console_t *con, const size_t x, const size_t y) {
     if (x >= con->viewport_col_nbr || y >= con->viewport_row_nbr) {
         return false;
     }
 
-    const uint16_t pos = y * con->viewport_col_nbr + x;
+    const uintptr_t delta = (con->viewport_origin - (uintptr_t)g_vga_vram_start) / 2;
+    const uint16_t  pos   = delta + y * con->viewport_col_nbr + x;
 
     output_byte(VGA_CRTC_ADDR_REG, VGA_CURSOR_LOCATION_LOW_REG);
     output_byte(VGA_CRTC_DATA_REG, pos & 0xFF);
@@ -162,6 +164,11 @@ vga_set_cursor_pos(const console_t *con, const size_t x, const size_t y) {
     output_byte(VGA_CRTC_DATA_REG, (pos >> 8) & 0xFF);
 
     return true;
+}
+
+static void
+vga_switch(const console_t *con) {
+    memcpy(g_vga_vram_start, (const void *)con->buffer, con->buffer_size);
 }
 
 static bool
@@ -180,11 +187,15 @@ vga_put_char(const console_t *con, unsigned char c, size_t x, size_t y) {
 
 static void
 vga_init(console_t *con) {
-    g_vga_vram_start = VGA_COLOR_FRAMEBUFFER_ADDR;
-    g_vga_vram_end   = g_vga_vram_start + (VGA_FRAMEBUFFER_WIDTH * VGA_FRAMEBUFFER_HEIGHT) * 2;
-    g_vga_attribute  = VGA_COLOR_LIGHT_GREY | VGA_COLOR_BLACK << 4;
+    if (g_console_buffer_idx >= NBR_AVAILABLE_CONSOLE) {
+        return;
+    }
 
-    vga_clear_vram(g_vga_vram_start, g_vga_vram_end);
+    con->buffer = (uintptr_t)g_console_buffer[g_console_buffer_idx];
+    con->buffer_size = VGA_COLOR_FRAMEBUFFER_SIZE;
+    g_console_buffer_idx++;
+
+    vga_clear_vram((uint16_t *)con->buffer, (uint16_t *)(con->buffer + con->buffer_size));
 
     con->viewport_col_size = 2;
     con->viewport_col_nbr  = VGA_FRAMEBUFFER_WIDTH;
@@ -203,6 +214,7 @@ console_impl_t VGA_CONSOLE_DRIVER = {
     .init             = vga_init,
     .put_char         = vga_put_char,
     .scroll           = vga_scroll,
+    ._switch          = vga_switch,
     .set_cursor_pos   = vga_set_cursor_pos,
     .set_cursor_style = vga_set_cursor_style,
 };

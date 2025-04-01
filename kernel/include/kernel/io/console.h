@@ -58,11 +58,15 @@ typedef struct console_s {
 
     size_t viewport_col_size;
     size_t viewport_col_nbr;
+
+    uintptr_t buffer;
+    size_t buffer_size;
 } console_t;
 
 typedef struct console_impl_s {
     void (*init)(console_t *);
-    bool (*scroll)(console_t *, console_scroll_dir_t, size_t);
+    void (*_switch)(const console_t *);
+    bool (*scroll)(console_t *, console_scroll_dir_t);
     bool (*put_char)(const console_t *, unsigned char, size_t, size_t);
     void (*set_cursor_style)(console_cursor_t);
     bool (*set_cursor_pos)(const console_t *, size_t, size_t);

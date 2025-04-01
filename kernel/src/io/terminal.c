@@ -1,6 +1,6 @@
 #include <kernel/io/console.h>
 
-static console_impl_t *g_console_impl;
+static console_impl_t *g_ci;
 static console_t g_console;
 
 static size_t x;
@@ -13,7 +13,7 @@ static void terminal_putc(unsigned char c) {
             y += 1;
             break;
         default:
-            g_console_impl->put_char(&g_console, c, x, y);
+            g_ci->put_char(&g_console, c, x, y);
             x += 1;
             break;
     }
@@ -22,22 +22,24 @@ static void terminal_putc(unsigned char c) {
         y += 1;
     }
     if (y >= g_console.viewport_row_nbr) {
-        g_console_impl->scroll(&g_console, CONSOLE_SCROLL_UP, 1);
+        g_ci->scroll(&g_console, CONSOLE_SCROLL_UP);
         x = 0;
         y -= 1;
     }
 
-    g_console_impl->set_cursor_pos(&g_console, x, y);
+    g_ci->set_cursor_pos(&g_console, x, y);
 }
 
-void terminal_init(console_impl_t *console_impl) {
+void terminal_init(console_impl_t *ci) {
     x = 0;
     y = 0;
 
-    console_impl->init(&g_console);
-    console_impl->set_cursor_style(CONSOLE_CURSOR_BLOCK);
-    console_impl->set_cursor_pos(&g_console, x, y);
-    g_console_impl = console_impl;
+    ci->init(&g_console);
+    ci->set_cursor_style(CONSOLE_CURSOR_BLOCK);
+    ci->set_cursor_pos(&g_console, x, y);
+    ci->_switch(&g_console);
+
+    g_ci = ci;
 }
 
 void terminal_write(const unsigned char *buffer, size_t size) {
