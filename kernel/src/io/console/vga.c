@@ -3,6 +3,7 @@
  * @brief VGA driver implementation.
  *
  * @see http://www.osdever.net/FreeVGA/vga/vgatext.htm
+ * @see http://www.osdever.net/FreeVGA/vga/crtcreg.htm
  */
 
 #include <kernel/io/console.h>

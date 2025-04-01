@@ -10,6 +10,7 @@ iso:
 	@bash -c "$(TOOLS_DIR)/iso.sh"
 clean:
 	@bash -c "$(TOOLS_DIR)/clean.sh"
+
 launch:
 	qemu-system-i386 -trace cpu* -cdrom $(NAME).iso
 launch-dbg:
