@@ -149,7 +149,7 @@ vga_scroll(console_t *con, console_scroll_dir_t dir) {
 }
 
 static bool
-vga_set_cursor_pos(console_t *con, const size_t x, const size_t y) {
+vga_set_cursor_pos(const console_t *con, const size_t x, const size_t y) {
     if (x >= con->viewport_col_nbr || y >= con->viewport_row_nbr) {
         return false;
     }

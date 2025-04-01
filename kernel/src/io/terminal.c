@@ -12,6 +12,12 @@ static void terminal_putc(unsigned char c) {
             x = 0;
             y += 1;
             break;
+        case '\b':
+            if (x > 0) {
+                x -= 1;
+            }
+            g_ci->put_char(&g_console, ' ', x, y);
+            break;
         default:
             g_ci->put_char(&g_console, c, x, y);
             x += 1;
@@ -42,8 +48,8 @@ void terminal_init(console_impl_t *ci) {
     g_ci = ci;
 }
 
-void terminal_write(const unsigned char *buffer, size_t size) {
+void terminal_write(const char *buffer, size_t size) {
     for (size_t i = 0; i < size; i++) {
-        terminal_putc(buffer[i]);
+        terminal_putc((unsigned char)buffer[i]);
     }
 }

@@ -40,6 +40,7 @@ static const unsigned char normal_ascii_map[256] = {
     [VK_Z] = 'z',
     [VK_SPACE] = ' ',
     [VK_RETURN] = '\n',
+    [VK_BACKSPACE] = '\b',
 };
 
 static const unsigned char shift_ascii_map[256] = {
@@ -81,6 +82,7 @@ static const unsigned char shift_ascii_map[256] = {
     [VK_Z] = 'Z',
     [VK_SPACE] = normal_ascii_map[VK_SPACE],
     [VK_RETURN] = normal_ascii_map[VK_RETURN],
+    [VK_BACKSPACE] = normal_ascii_map[VK_BACKSPACE],
 };
 
 
@@ -96,7 +98,7 @@ static unsigned char translate_ascii(const kbd_event_t kbd_state[256], const kbd
     }
 }
 
-kbd_layout_t kbd_qwerty_layout = {
+kbd_layout_t KBD_QWERTY_LAYOUT = {
     .vk_map = {
         [0x3B] = VK_F1,
         [0x3C] = VK_F2,
@@ -154,6 +156,7 @@ kbd_layout_t kbd_qwerty_layout = {
 
         [0x39] = VK_SPACE,
         [0x1C] = VK_RETURN,
+        [0x0E] = VK_BACKSPACE,
     },
     .translate_ascii = translate_ascii,
 };

@@ -59,6 +59,7 @@
 
 #define VK_SPACE 0x20
 #define VK_RETURN 0x0D
+#define VK_BACKSPACE 0x08
 
 typedef struct kbd_event_flags_s {
     uint8_t is_pressed : 1;
