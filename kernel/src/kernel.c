@@ -32,6 +32,12 @@ readline(const char *prefix) {
 
         kbd_event = kbd_on_input(input_byte(0x60));
         if (kbd_event != NULL) {
+
+            if (!kbd_event->flags.is_pressed) {
+                /* Ignore key releases. */
+                continue;
+            }
+
             ascii = kbd_translate_event(kbd_event);
 
             if (!ascii) {
