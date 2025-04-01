@@ -168,6 +168,7 @@ vga_set_cursor_pos(const console_t *con, const size_t x, const size_t y) {
 static void
 vga_load(const console_t *con) {
     memcpy(g_vga_vram_start, (const void *)con->buffer, con->buffer_size);
+    vga_set_addr(con);
 }
 
 static void
