@@ -10,7 +10,6 @@
 #include <kernel/io/helper.h>
 #include <string.h>
 
-#define NBR_AVAILABLE_CONSOLE 2
 
 #define VGA_COLOR_FRAMEBUFFER_ADDR 0xB8000
 #define VGA_COLOR_FRAMEBUFFER_SIZE 0x8000
@@ -167,8 +166,13 @@ vga_set_cursor_pos(const console_t *con, const size_t x, const size_t y) {
 }
 
 static void
-vga_switch(const console_t *con) {
+vga_load(const console_t *con) {
     memcpy(g_vga_vram_start, (const void *)con->buffer, con->buffer_size);
+}
+
+static void
+vga_save(console_t *con) {
+    memcpy((void *)con->buffer, g_vga_vram_start, con->buffer_size);
 }
 
 static bool
@@ -191,7 +195,7 @@ vga_init(console_t *con) {
         return;
     }
 
-    con->buffer = (uintptr_t)g_console_buffer[g_console_buffer_idx];
+    con->buffer      = (uintptr_t)g_console_buffer[g_console_buffer_idx];
     con->buffer_size = VGA_COLOR_FRAMEBUFFER_SIZE;
     g_console_buffer_idx++;
 
@@ -214,7 +218,9 @@ console_impl_t VGA_CONSOLE_DRIVER = {
     .init             = vga_init,
     .put_char         = vga_put_char,
     .scroll           = vga_scroll,
-    ._switch          = vga_switch,
+    .load             = vga_load,
+    .save             = vga_save,
     .set_cursor_pos   = vga_set_cursor_pos,
     .set_cursor_style = vga_set_cursor_style,
+    .max_console_nbr  = NBR_AVAILABLE_CONSOLE,
 };

@@ -1,54 +1,81 @@
 #include <kernel/io/console.h>
+typedef struct terminal_s {
+    size_t    x;
+    size_t    y;
+    console_t console;
+} terminal_t;
 
-static console_impl_t *g_ci;
-static console_t g_console;
+static console_impl_t *con_impl;
 
-static size_t x;
-static size_t y;
+static terminal_t  terms[NBR_AVAILABLE_CONSOLE];
+static size_t      term_idx    = 0;
+static terminal_t *active_term = NULL;
 
-static void terminal_putc(unsigned char c) {
+static void
+terminal_putc(unsigned char c) {
     switch (c) {
         case '\n':
-            x = 0;
-            y += 1;
+            active_term->x = 0;
+            active_term->y += 1;
             break;
         case '\b':
-            if (x > 0) {
-                x -= 1;
+            if (active_term->x > 0) {
+                active_term->x -= 1;
             }
-            g_ci->put_char(&g_console, ' ', x, y);
+            con_impl->put_char(&active_term->console, ' ', active_term->x, active_term->y);
             break;
         default:
-            g_ci->put_char(&g_console, c, x, y);
-            x += 1;
+            con_impl->put_char(&active_term->console, c, active_term->x, active_term->y);
+            active_term->x += 1;
             break;
     }
-    if (x >= g_console.viewport_col_nbr) {
-        x = 0;
-        y += 1;
+
+    if (active_term->x >= active_term->console.viewport_col_nbr) {
+        active_term->x = 0;
+        active_term->y += 1;
     }
-    if (y >= g_console.viewport_row_nbr) {
-        g_ci->scroll(&g_console, CONSOLE_SCROLL_UP);
-        x = 0;
-        y -= 1;
+    if (active_term->y >= active_term->console.viewport_row_nbr) {
+        con_impl->scroll(&active_term->console, CONSOLE_SCROLL_UP);
+        active_term->x = 0;
+        active_term->y -= 1;
     }
 
-    g_ci->set_cursor_pos(&g_console, x, y);
+    con_impl->set_cursor_pos(&active_term->console, active_term->x, active_term->y);
 }
 
-void terminal_init(console_impl_t *ci) {
-    x = 0;
-    y = 0;
+void
+terminal_switch() {
+    con_impl->save(&active_term->console);
 
-    ci->init(&g_console);
-    ci->set_cursor_style(CONSOLE_CURSOR_BLOCK);
-    ci->set_cursor_pos(&g_console, x, y);
-    ci->_switch(&g_console);
+    if (term_idx == 0) {
+        term_idx = 1;
+    } else {
+        term_idx = 0;
+    }
 
-    g_ci = ci;
+    active_term = &terms[term_idx];
+
+    con_impl->load(&active_term->console);
+    con_impl->set_cursor_pos(&active_term->console, active_term->x, active_term->y);
 }
 
-void terminal_write(const char *buffer, size_t size) {
+void
+terminal_init(console_impl_t *ci) {
+    con_impl = ci;
+
+    for (size_t i = 0; i < NBR_AVAILABLE_CONSOLE; i++) {
+        terms[i].x = 0;
+        terms[i].y = 0;
+        con_impl->init(&terms[i].console);
+    }
+
+    term_idx = 0;
+    active_term = &terms[term_idx];
+    con_impl->load(&active_term->console);
+}
+
+void
+terminal_write(const char *buffer, size_t size) {
     for (size_t i = 0; i < size; i++) {
         terminal_putc((unsigned char)buffer[i]);
     }

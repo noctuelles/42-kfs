@@ -83,8 +83,14 @@ kernel_main(uint32_t magic, multiboot_info_t *mbi) {
 
     while (1) {
         command = readline("kfs> ");
+
         if (command && *command) {
-            printf("command not found: %s\n", command);
+
+            if (strcmp(command, "switch") == 0) {
+                terminal_switch();
+            } else {
+                printf("command not found: %s\n", command);
+            }
         }
     }
 }
