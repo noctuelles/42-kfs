@@ -153,6 +153,7 @@ kbd_layout_t KBD_QWERTY_LAYOUT = {
 
         [0x2A] = VK_LSHIFT,
         [0x36] = VK_RSHIFT,
+        [0x1D] = VK_LCONTROL,
 
         [0x39] = VK_SPACE,
         [0x1C] = VK_RETURN,

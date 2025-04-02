@@ -82,6 +82,7 @@ terminal_init(console_impl_t *ci) {
     term_idx = 0;
     active_term = &terms[term_idx];
     con_impl->load(&active_term->console);
+    con_impl->set_cursor_style(CONSOLE_CURSOR_BLOCK);
 }
 
 void

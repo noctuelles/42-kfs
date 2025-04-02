@@ -22,6 +22,10 @@ void kbd_init(const kbd_layout_t *layout)
     kbd_layout = layout;
 }
 
+kbd_event_t kbd_get_key_state(uint8_t vk) {
+    return kbd_state[vk];
+}
+
 const kbd_event_t *kbd_on_input(uint8_t scancode)
 {
     uint8_t vk = 0;

@@ -57,6 +57,10 @@
 #define VK_LSHIFT 0xA0
 #define VK_RSHIFT 0xA1
 
+#define VK_CONTROL 0x11
+#define VK_LCONTROL 0xA2
+#define VK_RCONTROL 0xA3
+
 #define VK_SPACE 0x20
 #define VK_RETURN 0x0D
 #define VK_BACKSPACE 0x08
@@ -79,6 +83,8 @@ typedef struct kbd_layout_s {
     unsigned char (*translate_ascii)(const kbd_event_t kbd_state[256], const kbd_event_t *kbd_event);
 } kbd_layout_t;
 
+
+kbd_event_t kbd_get_key_state(uint8_t vk);
 void kbd_init(const kbd_layout_t *layout);
 const kbd_event_t *kbd_on_input(uint8_t scancode);
 unsigned char kbd_translate_event(const kbd_event_t *event);
