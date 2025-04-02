@@ -46,8 +46,7 @@ typedef struct console_s {
     uintptr_t viewport_origin;
 
     /**
-     * @brief Visible origin of the viewport. It can change independently from the origin during a scrollback or a
-     * scrollfront.
+     * @brief Visible origin of the viewport.
      *
      */
     uintptr_t viewport_visible_origin;
@@ -58,6 +57,10 @@ typedef struct console_s {
      */
     uintptr_t viewport_end;
 
+    /**
+     * @brief Visible end of the viewport.
+     * 
+     */
     uintptr_t viewport_visible_end;
 
     /**
@@ -78,12 +81,34 @@ typedef struct console_s {
      */
     size_t viewport_size;
 
+    /**
+     * @brief Size in bytes of one column.
+     * 
+     */
     size_t viewport_col_size;
+
+    /**
+     * @brief Number of columns in one row.
+     * 
+     */
     size_t viewport_col_nbr;
 
+    /**
+     * @brief Buffer that is used to save the VRAM.
+     * 
+     */
     uintptr_t buffer;
+
+    /**
+     * @brief Size of the buffer.
+     * 
+     */
     size_t    buffer_size;
 
+    /**
+     * @brief Attribute byte.
+     * 
+     */
     uint8_t attr;
 } console_t;
 
