@@ -11,12 +11,12 @@
 #include <kernel/io/helper.h>
 #include <string.h>
 
-
-#define VGA_COLOR_FRAMEBUFFER_ADDR 0xB8000
-#define VGA_COLOR_FRAMEBUFFER_SIZE 0x8000
-
 #define VGA_FRAMEBUFFER_WIDTH 80
 #define VGA_FRAMEBUFFER_HEIGHT 25
+
+#define VGA_COLOR_FRAMEBUFFER_ADDR 0xB8000
+#define VGA_COLOR_VISIBLE_PAGE 2
+#define VGA_COLOR_FRAMEBUFFER_SIZE ((VGA_FRAMEBUFFER_WIDTH * 2 * VGA_FRAMEBUFFER_HEIGHT) * VGA_COLOR_VISIBLE_PAGE)
 
 #define VGA_CRTC_ADDR_REG 0x3D4
 #define VGA_CRTC_DATA_REG 0x3D5
@@ -29,37 +29,13 @@
 #define VGA_CURSOR_LOCATION_HIGH_REG 0x0E
 #define VGA_CURSOR_LOCATION_LOW_REG 0x0F
 
-#define VGA_ERASE_CHAR (' ' | (VGA_COLOR_LIGHT_GREY << 8))
-typedef enum vga_color_e {
-    VGA_COLOR_BLACK         = 0,
-    VGA_COLOR_BLUE          = 1,
-    VGA_COLOR_GREEN         = 2,
-    VGA_COLOR_CYAN          = 3,
-    VGA_COLOR_RED           = 4,
-    VGA_COLOR_MAGENTA       = 5,
-    VGA_COLOR_BROWN         = 6,
-    VGA_COLOR_LIGHT_GREY    = 7,
-    VGA_COLOR_DARK_GREY     = 8,
-    VGA_COLOR_LIGHT_BLUE    = 9,
-    VGA_COLOR_LIGHT_GREEN   = 10,
-    VGA_COLOR_LIGHT_CYAN    = 11,
-    VGA_COLOR_LIGHT_RED     = 12,
-    VGA_COLOR_LIGHT_MAGENTA = 13,
-    VGA_COLOR_LIGHT_BROWN   = 14,
-    VGA_COLOR_WHITE         = 15,
-} vga_color_t;
+#define VGA_ERASE_CHAR (vga_get_pair(' ', vga_get_attr(CONSOLE_COLOR_LIGHT_GREY, CONSOLE_COLOR_BLACK)))
 
 static uint8_t g_console_buffer[NBR_AVAILABLE_CONSOLE][VGA_COLOR_FRAMEBUFFER_SIZE] = {0};
 static size_t  g_console_buffer_idx                                                = 0;
 
 static uint16_t *g_vga_vram_start = (uint16_t *)VGA_COLOR_FRAMEBUFFER_ADDR;
 static uint16_t *g_vga_vram_end   = (uint16_t *)(VGA_COLOR_FRAMEBUFFER_ADDR + VGA_COLOR_FRAMEBUFFER_SIZE);
-static uint8_t   g_vga_attribute  = VGA_COLOR_LIGHT_GREY | VGA_COLOR_BLACK << 4;
-
-static inline uint16_t
-vga_get_pair(unsigned char c) {
-    return c | g_vga_attribute << 8;
-}
 
 static void
 vga_clear_vram(uint16_t *start, uint16_t *end) {
@@ -78,6 +54,11 @@ vga_set_addr(const console_t *con) {
     output_byte(VGA_CRTC_DATA_REG, offset & 0xFF);
     output_byte(VGA_CRTC_ADDR_REG, VGA_START_ADDR_HIGH_REG);
     output_byte(VGA_CRTC_DATA_REG, (offset >> 8) & 0xFF);
+}
+
+static void
+vga_set_attr(console_t *c, console_color_t fg, console_color_t bg) {
+    c->attr = vga_get_attr(fg, bg);
 }
 
 static void
@@ -117,6 +98,65 @@ vga_set_cursor_style(const console_cursor_t cursor) {
     output_byte(VGA_CRTC_DATA_REG, cursor_end);
 }
 
+/**
+ * @brief A 'softscroll' is a scrolling mechanism that does not modify the VGA framebuffer. It moves the visible origin
+ * of the console and update the VGA Start Address register.
+ *
+ * @param con Console handle
+ * @param dir Direction of the softscroll
+ * @param n How many lines to scroll.
+ * @return true Can scroll.
+ * @return false Cannot scroll.
+ */
+static bool
+vga_softscroll(console_t *con, console_scroll_dir_t dir, size_t n) {
+    const size_t delta = n * con->viewport_row_size;
+
+    if (dir == CONSOLE_SCROLL_UP) {
+        if (con->viewport_visible_origin - delta < (uintptr_t)g_vga_vram_start) {
+            return false;
+        }
+        con->viewport_visible_origin -= delta;
+        con->viewport_visible_end -= delta;
+    } else if (dir == CONSOLE_SCROLL_DOWN) {
+        if (con->viewport_visible_end + delta > con->viewport_end) {
+            return false;
+        }
+        con->viewport_visible_origin += delta;
+        con->viewport_visible_end += delta;
+    }
+
+    vga_set_addr(con);
+    return true;
+}
+
+/**
+ * @brief Restore
+ *
+ * @param con
+ */
+void
+vga_restore(console_t *con) {
+    con->viewport_visible_origin = con->viewport_origin;
+    con->viewport_visible_end    = con->viewport_end;
+
+    vga_set_addr(con);
+}
+
+static bool
+vga_put_char(console_t *con, unsigned char c, size_t x, size_t y) {
+    uint16_t *ptr;
+
+    if (x >= con->viewport_col_nbr || y >= con->viewport_row_nbr) {
+        return false;
+    }
+
+    ptr  = (uint16_t *)(con->viewport_origin + (y * con->viewport_row_size + x * con->viewport_col_size));
+    *ptr = vga_get_pair(c, con->attr);
+
+    return true;
+}
+
 static bool
 vga_scroll(console_t *con, console_scroll_dir_t dir) {
     size_t delta;
@@ -143,7 +183,10 @@ vga_scroll(console_t *con, console_scroll_dir_t dir) {
             /* NOT IMPLEMENTED */
             return false;
     }
+
     con->viewport_visible_origin = con->viewport_origin;
+    con->viewport_visible_end    = con->viewport_end;
+
     vga_set_addr(con);
     return true;
 }
@@ -177,20 +220,6 @@ vga_save(console_t *con) {
     memcpy((void *)con->buffer, g_vga_vram_start, con->buffer_size);
 }
 
-static bool
-vga_put_char(const console_t *con, unsigned char c, size_t x, size_t y) {
-    uint16_t *ptr;
-
-    if (x >= con->viewport_col_nbr || y >= con->viewport_row_nbr) {
-        return false;
-    }
-
-    ptr  = (uint16_t *)(con->viewport_origin + (y * con->viewport_row_size + x * con->viewport_col_size));
-    *ptr = vga_get_pair(c);
-
-    return true;
-}
-
 static void
 vga_init(console_t *con) {
     if (g_console_buffer_idx >= NBR_AVAILABLE_CONSOLE) {
@@ -213,16 +242,23 @@ vga_init(console_t *con) {
 
     con->viewport_origin         = (uintptr_t)g_vga_vram_start;
     con->viewport_visible_origin = con->viewport_origin;
-    con->viewport_end            = con->viewport_origin + con->viewport_size;
+
+    con->viewport_end         = con->viewport_origin + con->viewport_size;
+    con->viewport_visible_end = con->viewport_end;
+
+    con->attr = vga_get_attr(CONSOLE_COLOR_LIGHT_GREY, CONSOLE_COLOR_BLACK);
 }
 
 console_impl_t VGA_CONSOLE_DRIVER = {
     .init             = vga_init,
     .put_char         = vga_put_char,
+    .softscroll       = vga_softscroll,
     .scroll           = vga_scroll,
+    .restore          = vga_restore,
     .load             = vga_load,
     .save             = vga_save,
     .set_cursor_pos   = vga_set_cursor_pos,
     .set_cursor_style = vga_set_cursor_style,
+    .set_attr         = vga_set_attr,
     .max_console_nbr  = NBR_AVAILABLE_CONSOLE,
 };

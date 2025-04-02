@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   kernel.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: plouvel <plouvel@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/02 16:02:18 by plouvel           #+#    #+#             */
+/*   Updated: 2025/04/02 16:19:41 by plouvel          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <kernel/io/console/vga.h>
 #include <kernel/io/helper.h>
 #include <kernel/io/keyboard/layout_qwerty.h>
@@ -23,7 +35,10 @@ readline(const char *prefix) {
     unsigned char      ascii      = 0;
     size_t             i          = 0;
 
-    terminal_write(prefix, strlen(prefix));
+    terminal_set_color(CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
+    printf(prefix);
+    terminal_set_color(CONSOLE_COLOR_LIGHT_GREY, CONSOLE_COLOR_BLACK);
+    printf("> ");
 
     while (1) {
         while (!(input_byte(0x64) & 0x01)) {
@@ -41,6 +56,12 @@ readline(const char *prefix) {
             ascii = kbd_translate_event(kbd_event);
 
             if (!ascii) {
+                if (kbd_event->vk == VK_F1) {
+                    terminal_scroll(CONSOLE_SCROLL_UP, 1);
+                }
+                if (kbd_event->vk == VK_F2) {
+                    terminal_scroll(CONSOLE_SCROLL_DOWN, 1);
+                }
                 continue;
             }
 
@@ -77,18 +98,8 @@ kernel_main(uint32_t magic, multiboot_info_t *mbi) {
         return;
     }
 
-    puts(" _  ________ _____ ");
-    puts("| |/ /  ____/ ____|");
-    puts("| ' /| |__ | (___  ");
-    puts("|  < |  __| \\___ \\ ");
-    puts("| . \\| |    ____) |");
-    puts("|_|\\_\\_|   |_____/ ");
-    puts("");
-    puts("Welcome to Kernel From Scratch!");
-    puts("");
-
     while (1) {
-        command = readline("kfs> ");
+        command = readline("kfs");
 
         if (command && *command) {
 

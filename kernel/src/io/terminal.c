@@ -59,6 +59,16 @@ terminal_switch() {
     con_impl->set_cursor_pos(&active_term->console, active_term->x, active_term->y);
 }
 
+
+void terminal_scroll(console_scroll_dir_t dir, size_t n) {
+    con_impl->softscroll(&active_term->console, dir, n);
+}
+
+
+void terminal_set_color(console_color_t foreground, console_color_t background) {
+    con_impl->set_attr(&active_term->console, foreground, background);
+}
+
 void
 terminal_init(console_impl_t *ci) {
     con_impl = ci;

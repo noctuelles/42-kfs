@@ -21,8 +21,6 @@ menuentry "$NAME" {
 }
 EOF
 
-set -x
-
 grub-mkimage \
 	--config="$ISODIR/boot/grub/grub.cfg" \
 	--output="$TMP_GRUB" \
@@ -46,6 +44,9 @@ rm -rf $TMP_GRUB
 
 # Generate an El Torito image that can be booted by the BIOS.
 xorriso \
+	-out_charset utf-8 \
+	-volid "KFS" \
+	-publisher "42" \
 	-pathspecs on \
 	-outdev $NAME.iso \
 	-blank as_needed \

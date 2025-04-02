@@ -3,6 +3,7 @@
         "*.c": "c",
         "type_traits": "cpp",
         "stddef.h": "c",
-        "vgaterminal.h": "c"
+        "vgaterminal.h": "c",
+        "vga.h": "c"
     }
 }
