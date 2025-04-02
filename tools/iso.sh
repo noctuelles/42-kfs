@@ -3,6 +3,7 @@ set -e
 
 TOOLSDIR=${TOOLSDIR:-"$(cd `dirname $0` && pwd)"}
 PROJECTROOT=${PROJECTROOT:-"${TOOLSDIR}/.."}
+TMP_GRUB=/tmp/core.img
 
 . $TOOLSDIR/build.sh
 
@@ -24,29 +25,33 @@ set -x
 
 grub-mkimage \
 	--config="$ISODIR/boot/grub/grub.cfg" \
-	--output="/tmp/core.img" \
+	--output="$TMP_GRUB" \
 	--prefix="(cd)" \
 	--format=i386-pc \
 	multiboot \
 	biosdisk \
 	iso9660
 
-# Copy the stage 1 bootloader of GRUB 2
-dd if=/usr/lib/grub/i386-pc/cdboot.img of=$ISODIR/boot/grub/grub.img
-# Append the stage 1.5 generated GRUB 2 core image
-dd if=/tmp/core.img of=$ISODIR/boot/grub/grub.img conv=notrunc oflag=append
+dd \
+	if=/usr/lib/grub/i386-pc/cdboot.img \
+	of=$ISODIR/boot/grub/grub.img
 
-rm -rf /tmp/core.img
+dd \
+	if=$TMP_GRUB \
+	of=$ISODIR/boot/grub/grub.img \
+	conv=notrunc \
+	oflag=append
 
-# Generate an El Torito image.
-xorriso -as mkisofs \
-	-graft-points \
-	-input-charset utf8 \
-	-A "$NAME" \
-	-R \
-	-b boot/grub/grub.img \
-	-no-emul-boot \
-	-boot-load-size 4 \
-	-boot-info-table \
-	-o $NAME.iso \
-	$ISODIR/
+rm -rf $TMP_GRUB
+
+# Generate an El Torito image that can be booted by the BIOS.
+xorriso \
+	-pathspecs on \
+	-outdev $NAME.iso \
+	-blank as_needed \
+	-boot_image grub bin_path=/boot/grub/grub.img \
+	-boot_image grub cat_path=/boot.catalog \
+	-boot_image grub emul_type=no_emulation \
+	-boot_image grub boot_info_table=on \
+	-boot_image grub load_size=4096 \
+	-map $ISODIR /
