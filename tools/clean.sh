@@ -11,3 +11,5 @@ for PROJECT in $PROJECTS; do
 done
 
 rm -rf $SYSROOT
+rm -rf $ISODIR
+rm -rf $NAME.iso
