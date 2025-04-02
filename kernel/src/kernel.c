@@ -23,6 +23,7 @@ readline(const char *prefix) {
     unsigned char      ascii      = 0;
     size_t             i          = 0;
 
+
     terminal_set_color(CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
     printf(prefix);
     terminal_set_color(CONSOLE_COLOR_LIGHT_GREY, CONSOLE_COLOR_BLACK);
@@ -86,6 +87,8 @@ kernel_main(uint32_t magic, multiboot_info_t *mbi) {
         return;
     }
 
+    puts("Type 'help' for a list of commands.\n");
+
     while (1) {
         command = readline("kfs");
 
@@ -93,6 +96,8 @@ kernel_main(uint32_t magic, multiboot_info_t *mbi) {
 
             if (strcmp(command, "switch") == 0) {
                 terminal_switch();
+            } else if (strcmp(command, "help") == 0) {
+                puts("switch - switch to another virtual terminal.");
             } else {
                 printf("command not found: %s\n", command);
             }
