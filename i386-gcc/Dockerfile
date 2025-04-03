@@ -6,8 +6,7 @@ ENV TARGET=i386-elf \
     GCC_VERSION=14.2.0 \
     NPROC=20
 
-RUN apt update && apt upgrade -y
-RUN apt install -y \
+RUN apt update && apt upgrade -y && apt install -y \
     wget \
     build-essential \
     bison \
@@ -21,7 +20,8 @@ RUN apt install -y \
     python3-dev \
     python-is-python3 \
     libsource-highlight-dev \
-    libisl-dev
+    libisl-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp/cross
 
