@@ -1,19 +1,24 @@
 NAME?=kfs
 TOOLS_DIR=tools
+DOCKER_TAG=kfs/env
+DOCKER_CMD=docker run -p 5901:5901 -v "$(shell pwd):/root/env" -it $(DOCKER_TAG)
 
-#docker build -t kfs/build-env .
-#docker run -v "$(pwd):/root/env" -it kfs/build-env make iso
+image:
+	docker build -t $(DOCKER_TAG) .
 
-build:
-	@bash -c "$(TOOLS_DIR)/build.sh"
-iso:
-	@bash -c "$(TOOLS_DIR)/iso.sh"
+build: image
+	 @$(DOCKER_CMD) $(TOOLS_DIR)/build.sh
+
+$(NAME).iso: build
+	 @$(DOCKER_CMD) $(TOOLS_DIR)/iso.sh
+
+run: $(NAME).iso
+	 @bash -c -i "$(TOOLS_DIR)/run.sh"
+
+run-dbg: $(NAME).iso
+	 @bash -c -i "$(TOOLS_DIR)/run-dbg.sh"
+
 clean:
-	@bash -c "$(TOOLS_DIR)/clean.sh"
+	 @$(DOCKER_CMD) $(TOOLS_DIR)/clean.sh
 
-launch:
-	qemu-system-i386 -trace cpu* -cdrom $(NAME).iso
-launch-dbg:
-	qemu-system-i386  -m 521M -s -S -cdrom $(NAME).iso
-
-.PHONY: build iso clean launch launch-dbg
+.PHONY: image build run run-dbg clean

@@ -2,13 +2,15 @@ SYSTEM_HEADER_PROJECTS="libc kernel"
 PROJECTS="libc kernel"
 
 export MAKE=${MAKE:-make}
-export HOST=i686-elf
+export HOST=i386-elf
 export NAME=kfs
 
 export AR=${HOST}-ar
 export AS=${HOST}-as
 export CC=${HOST}-gcc
 export CXX=${HOST}-g++
+export GDB=${HOST}-gdb
+export QEMU=qemu-system-i386
 
 export PREFIX=/usr
 export EXEC_PREFIX=$PREFIX
