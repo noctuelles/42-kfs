@@ -27,7 +27,7 @@ export CFLAGS='-O2 -g'
 export CPPFLAGS=''
 
 export SYSROOT="$(pwd)/sysroot"
-export CC="$CC --sysroot=$SYSROOT"
+export CC="$CC -masm=intel --sysroot=$SYSROOT "
 export CXX="$CXX --sysroot=$SYSROOT"
 
 if echo "$HOST" | grep -Eq -- '-elf($|-)'; then

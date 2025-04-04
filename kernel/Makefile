@@ -66,7 +66,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(AS) -msyntax=intel -mnaked-reg -c $< -o $@
 
 $(OBJ_DIR)/crtbegin.o $(OBJ_DIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
