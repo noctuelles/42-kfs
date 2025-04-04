@@ -10,7 +10,12 @@ typedef enum kbd_state_e
 {
     NORMAL,
     EXTENDED,
-    PAUSE,
+
+    EXTENDED_PRINT_MAKE_BYTE3,
+    EXTENDED_PRINT_MAKE_BYTE4,
+
+    EXTENDED_PRINT_BREAK_BYTE3,
+    EXTENDED_PRINT_BREAK_BYTE4,
 } kbd_driver_state_t;
 
 static kbd_event_t kbd_state[256] = {0};
@@ -19,10 +24,13 @@ static const kbd_layout_t *kbd_layout = NULL;
 
 void kbd_init(const kbd_layout_t *layout)
 {
+    /* TODO: set scan code 1. */
+
     kbd_layout = layout;
 }
 
-kbd_event_t kbd_get_key_state(uint8_t vk) {
+kbd_event_t kbd_get_key_state(uint8_t vk)
+{
     return kbd_state[vk];
 }
 
@@ -48,16 +56,74 @@ const kbd_event_t *kbd_on_input(uint8_t scancode)
         }
         break;
     case EXTENDED:
-        if (scancode == 0x2A) {
-            state = EXTENDED;
+        if (scancode == 0x2A)
+        {
+            state = EXTENDED_PRINT_MAKE_BYTE3;
+        }
+        else if (scancode == 0xB7)
+        {
+            state = EXTENDED_PRINT_BREAK_BYTE3;
+        }
+        else
+        {
+            vk = kbd_layout->extended_vk_map[scancode & 0x7F];
+            kbd_state[vk].vk = vk;
+            kbd_state[vk].scancode = scancode;
+            kbd_state[vk].flags.is_pressed = !IS_BREAK_CODE(scancode);
+            kbd_state[vk].flags.is_extended = true;
+
+            state = NORMAL;
+        }
+        break;
+    case EXTENDED_PRINT_MAKE_BYTE3:
+        if (scancode == 0xE0)
+        {
+            state = EXTENDED_PRINT_MAKE_BYTE4;
+        }
+        else
+        {
+            state = NORMAL;
+        }
+        break;
+    case EXTENDED_PRINT_MAKE_BYTE4:
+        if (scancode == 0x37)
+        {
+            vk = kbd_layout->extended_vk_map[scancode];
+
+            kbd_state[vk].vk = vk;
+            kbd_state[vk].scancode = scancode;
+            kbd_state[vk].flags.is_pressed = true;
+            kbd_state[vk].flags.is_extended = true;
         }
         state = NORMAL;
         break;
+    case EXTENDED_PRINT_BREAK_BYTE3:
+        if (scancode == 0xE0)
+        {
+            state = EXTENDED_PRINT_BREAK_BYTE4;
+        }
+        else
+        {
+            state = NORMAL;
+        }
+        break;
+    case EXTENDED_PRINT_BREAK_BYTE4:
+        if (scancode == 0xAA)
+        {
+            vk = kbd_layout->extended_vk_map[scancode];
+
+            kbd_state[vk].vk = vk;
+            kbd_state[vk].scancode = scancode;
+            kbd_state[vk].flags.is_pressed = false;
+            kbd_state[vk].flags.is_extended = true;
+        }
+        state = NORMAL;
     default:
         break;
     }
 
-    if (vk != 0) {
+    if (vk != 0)
+    {
         return &kbd_state[vk];
     }
 
@@ -66,7 +132,8 @@ const kbd_event_t *kbd_on_input(uint8_t scancode)
 
 unsigned char kbd_translate_event(const kbd_event_t *event)
 {
-    if (event == NULL) {
+    if (event == NULL)
+    {
         return 0;
     }
 

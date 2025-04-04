@@ -36,21 +36,25 @@ readline(const char *prefix) {
 
         kbd_event = kbd_on_input(input_byte(0x60));
         if (kbd_event != NULL) {
+            kbd_event_t crtl = kbd_get_key_state(VK_LCONTROL);
 
             if (!kbd_event->flags.is_pressed) {
                 /* Ignore key releases. */
                 continue;
             }
 
+            if (crtl.flags.is_pressed) {
+                if (kbd_event->vk == VK_U) {
+                    terminal_scroll(CONSOLE_SCROLL_UP, 3);
+                } else if (kbd_event->vk == VK_D) {
+                    terminal_scroll(CONSOLE_SCROLL_DOWN, 3);
+                }
+                continue;
+            }
+
             ascii = kbd_translate_event(kbd_event);
 
             if (!ascii) {
-                if (kbd_event->vk == VK_F1) {
-                    terminal_scroll(CONSOLE_SCROLL_UP, 1);
-                }
-                if (kbd_event->vk == VK_F2) {
-                    terminal_scroll(CONSOLE_SCROLL_DOWN, 1);
-                }
                 continue;
             }
 
