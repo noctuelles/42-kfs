@@ -7,8 +7,7 @@ PROJECTROOT=${PROJECTROOT:-"${TOOLSDIR}/.."}
 
 . $TOOLSDIR/config.sh
 
-docker run --name $NAME -d -p 5901:5901 -v "$(pwd):/root/env" -it kfs/env \
-    $QEMU -s -S -vnc :1 -cdrom $NAME.iso
+$DOCKER_RUN $QEMU -s -S -vnc :1 -cdrom $NAME.iso
 sleep 0.5
 vncviewer localhost:5901 &> /dev/null &
 docker exec -it $NAME $GDB \
@@ -17,4 +16,3 @@ docker exec -it $NAME $GDB \
     -ex "directory kernel" \
     -ex "directory libc"
 docker kill $NAME &> /dev/null
-docker container remove $NAME &> /dev/null

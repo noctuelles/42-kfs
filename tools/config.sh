@@ -10,7 +10,10 @@ export AS=${HOST}-as
 export CC=${HOST}-gcc
 export CXX=${HOST}-g++
 export GDB=${HOST}-gdb
+
 export QEMU=qemu-system-i386
+export DOCKER_IMAGE=noctuelles/kfs:latest
+export DOCKER_RUN="docker run -d --rm --name $NAME -p 5901:5901 -v "$(pwd):/root/env" -it $DOCKER_IMAGE"
 
 export PREFIX=/usr
 export EXEC_PREFIX=$PREFIX
