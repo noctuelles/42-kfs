@@ -45,9 +45,9 @@ readline(const char *prefix) {
 
             if (crtl.flags.is_pressed) {
                 if (kbd_event->vk == VK_U) {
-                    terminal_scroll(CONSOLE_SCROLL_UP, 3);
+                    terminal_scroll(CONSOLE_SCROLL_UP, 5);
                 } else if (kbd_event->vk == VK_D) {
-                    terminal_scroll(CONSOLE_SCROLL_DOWN, 3);
+                    terminal_scroll(CONSOLE_SCROLL_DOWN, 5);
                 }
                 continue;
             }
