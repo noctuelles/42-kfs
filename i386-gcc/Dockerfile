@@ -1,10 +1,10 @@
-FROM debian@sha256:70b337e820bf51d399fa5bfa96a0066fbf22f3aa2c3307e2401b91e2207ac3c3 AS builder
+FROM debian:bookworm-slim
 
-ENV TARGET=i386-elf \
-    BINUTILS_VERSION=2.44 \
-    GDB_VERSION=16.2 \
-    GCC_VERSION=14.2.0 \
-    NPROC=20
+ARG TARGET=i386-elf
+ARG BINUTILS_VERSION=2.44
+ARG GDB_VERSION=16.2
+ARG GCC_VERSION=14.2.0
+ARG NPROC
 
 RUN apt update && apt upgrade -y && apt install -y \
     wget \
@@ -33,18 +33,14 @@ RUN wget https://mirror.easyname.at/gnu/binutils/binutils-$BINUTILS_VERSION.tar.
     make -j $NPROC && \
     make install && \
     cd .. && \
-    rm -rf binutils-$BINUTILS_VERSION binutils-$BINUTILS_VERSION.tar.gz build-binutils-$BINUTILS_VERSION
-
-RUN wget https://mirror.easyname.at/gnu/gdb/gdb-$GDB_VERSION.tar.gz && \
+    wget https://mirror.easyname.at/gnu/gdb/gdb-$GDB_VERSION.tar.gz && \
     tar -xf gdb-$GDB_VERSION.tar.gz && \
     cd gdb-$GDB_VERSION && \
     ./configure --target=$TARGET --disable-werror --with-expat --enable-source-highlight --with-python && \
     make all-gdb -j $NPROC && \
     make install-gdb && \
     cd .. && \
-    rm -rf gdb-$GDB_VERSION gdb-$GDB_VERSION.tar.gz
-
-RUN wget https://mirror.easyname.at/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.gz && \
+    wget https://mirror.easyname.at/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.gz && \
     tar -xf gcc-$GCC_VERSION.tar.gz && \
     mkdir build-gcc-$GCC_VERSION && \
     cd build-gcc-$GCC_VERSION && \
@@ -56,6 +52,6 @@ RUN wget https://mirror.easyname.at/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.ta
     make install-target-libgcc && \
     make install-target-libstdc++-v3 && \
     cd .. && \
-    rm -rf gcc-$GCC_VERSION gcc-$GCC_VERSION.tar.gz build-gcc-$GCC_VERSION
+    rm -rf * 
 
 WORKDIR /

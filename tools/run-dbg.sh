@@ -9,7 +9,7 @@ PROJECTROOT=${PROJECTROOT:-"${TOOLSDIR}/.."}
 
 docker run --name $NAME -d -p 5901:5901 -v "$(pwd):/root/env" -it kfs/env \
     $QEMU -s -S -vnc :1 -cdrom $NAME.iso
-
+sleep 0.5
 vncviewer localhost:5901 &> /dev/null &
 docker exec -it $NAME $GDB \
     -ex "file sysroot/boot/kfs" \
