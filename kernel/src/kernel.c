@@ -1,5 +1,6 @@
 #include <kernel/io/console/vga.h>
 #include <kernel/io/helper.h>
+#include <kernel/io/keyboard.h>
 #include <kernel/io/keyboard/layout_qwerty.h>
 #include <kernel/io/keyboard/ps2_keyboard.h>
 #include <kernel/io/terminal.h>
@@ -18,7 +19,7 @@ kernel_fini() {}
 
 static const char *
 readline(const char *prefix) {
-    static char        buffer[56] = {0};
+    static char        buffer[256] = {0};
     const kbd_event_t *kbd_event  = NULL;
     unsigned char      ascii      = 0;
     size_t             i          = 0;

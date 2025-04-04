@@ -1,4 +1,5 @@
 #include <kernel/io/console.h>
+#include <kernel/io/terminal.h>
 typedef struct terminal_s {
     size_t    x;
     size_t    y;
@@ -30,7 +31,7 @@ terminal_putc(unsigned char c) {
             break;
     }
 
-    if (active_term->x >= active_term->console.viewport_col_nbr) {
+    if (active_term->x >= active_term->console.viewport_col_nbr - 1) {
         active_term->x = 0;
         active_term->y += 1;
     }

@@ -1,4 +1,5 @@
 #include <kernel/io/keyboard/ps2_keyboard.h>
+#include <kernel/io/keyboard.h>
 #include <stdint.h>
 
 static const unsigned char normal_ascii_map[256] = {
@@ -12,6 +13,18 @@ static const unsigned char normal_ascii_map[256] = {
     [VK_7] = '7',
     [VK_8] = '8',
     [VK_9] = '9',
+
+    [VK_NUMPAD0] = '0',
+    [VK_NUMPAD1] = '1',
+    [VK_NUMPAD2] = '2',
+    [VK_NUMPAD3] = '3',
+    [VK_NUMPAD4] = '4',
+    [VK_NUMPAD5] = '5',
+    [VK_NUMPAD6] = '6',
+    [VK_NUMPAD7] = '7',
+    [VK_NUMPAD8] = '8',
+    [VK_NUMPAD9] = '9',
+
     [VK_A] = 'a',
     [VK_B] = 'b',
     [VK_C] = 'c',
@@ -223,6 +236,9 @@ kbd_layout_t KBD_QWERTY_LAYOUT = {
     .extended_vk_map = {
         [0x1D] = VK_RCONTROL,
         [0x38] = VK_RMENU, // AltGr
+
+        [0x49] = VK_NEXT,
+        [0x51] = VK_PRIOR,
 
         [0x5B] = VK_LGUI,
         [0x5C] = VK_RGUI,
