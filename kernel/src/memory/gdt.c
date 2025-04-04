@@ -1,7 +1,7 @@
 #include <kernel/memory/gdt.h>
 #include <stddef.h>
 
-__attribute__((section(".gdt"))) gdt_entry_t gdt_entries[GDT_MAX_ENTRIES] = {
+__attribute__((section(".gdt"))) static gdt_entry_t gdt_entries[GDT_MAX_ENTRIES] = {
     {0},
     {.limit_low                  = 0xFFFF,
      .base_low                   = 0,
@@ -32,6 +32,11 @@ __attribute__((section(".gdt"))) gdt_entry_t gdt_entries[GDT_MAX_ENTRIES] = {
      .base_high                  = 0},
 };
 
+static const gdt_t gdt = {
+    .limit = sizeof(gdt_entries) - 1,
+    .base_address = (gdt_entry_t *)&gdt_entries,
+};
+
 void
 gdt_set_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit, segment_type_t segment_type,
               descriptor_type_t descriptor_type, dpl_t dpl, bool present, bool code64, bool db,
@@ -49,4 +54,9 @@ gdt_set_entry(gdt_entry_t *entry, uint32_t base, uint32_t limit, segment_type_t 
     entry->db                         = db;
     entry->granularity                = granularity;
     entry->base_high                  = (base >> 24) & 0xFF;
+}
+
+void
+gdt_load() {
+    asm volatile("lgdt [%0]" : : "m"(gdt));
 }

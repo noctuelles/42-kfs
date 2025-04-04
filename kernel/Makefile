@@ -18,6 +18,7 @@ LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 KERNEL_CPP_SRCS=kernel.c \
                 io/terminal.c \
+                memory/gdt.c \
                 io/console/vga.c \
 				io/keyboard/ps2_keyboard.c \
 				io/keyboard/layout_qwerty.c
@@ -50,7 +51,6 @@ all: $(NAME)
 
 $(NAME): $(OBJS) linker.ld
 	$(CC) -T linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot $(NAME) 
 
 clean:
 	rm -rf $(NAME)

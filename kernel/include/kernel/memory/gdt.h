@@ -43,4 +43,9 @@ typedef struct gdt_entry_e {
     uint8_t base_high;  // Upper 8 bits of base address
 } __attribute__((packed)) gdt_entry_t;
 
+typedef struct gdt_e {
+    uint16_t limit;
+    gdt_entry_t *base_address;
+} __attribute__((packed)) gdt_t;
+
 #endif
