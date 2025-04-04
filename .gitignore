@@ -2,3 +2,4 @@ sysroot
 isodir
 *.iso
 .bash_history
+.image_built

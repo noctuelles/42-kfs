@@ -1,5 +1,6 @@
 #include <kernel/io/console/vga.h>
 #include <kernel/io/helper.h>
+#include <kernel/io/keyboard.h>
 #include <kernel/io/keyboard/layout_qwerty.h>
 #include <kernel/io/keyboard/ps2_keyboard.h>
 #include <kernel/io/terminal.h>
@@ -18,7 +19,7 @@ kernel_fini() {}
 
 static const char *
 readline(const char *prefix) {
-    static char        buffer[56] = {0};
+    static char        buffer[256] = {0};
     const kbd_event_t *kbd_event  = NULL;
     unsigned char      ascii      = 0;
     size_t             i          = 0;
@@ -36,21 +37,25 @@ readline(const char *prefix) {
 
         kbd_event = kbd_on_input(input_byte(0x60));
         if (kbd_event != NULL) {
+            kbd_event_t crtl = kbd_get_key_state(VK_LCONTROL);
 
             if (!kbd_event->flags.is_pressed) {
                 /* Ignore key releases. */
                 continue;
             }
 
+            if (crtl.flags.is_pressed) {
+                if (kbd_event->vk == VK_U) {
+                    terminal_scroll(CONSOLE_SCROLL_UP, 5);
+                } else if (kbd_event->vk == VK_D) {
+                    terminal_scroll(CONSOLE_SCROLL_DOWN, 5);
+                }
+                continue;
+            }
+
             ascii = kbd_translate_event(kbd_event);
 
             if (!ascii) {
-                if (kbd_event->vk == VK_F1) {
-                    terminal_scroll(CONSOLE_SCROLL_UP, 1);
-                }
-                if (kbd_event->vk == VK_F2) {
-                    terminal_scroll(CONSOLE_SCROLL_DOWN, 1);
-                }
                 continue;
             }
 

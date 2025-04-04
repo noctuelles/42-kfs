@@ -22,15 +22,15 @@ stack_top:
 .type _start, @function
 
 _start:
-	mov %eax, %ecx
+    mov ecx, eax
 
-	pushl %ebx
-	pushl %ecx
-	call _init
-	call kernel_main
-	call _fini
-	cli
+    push ebx
+    push ecx
+    call _init
+    call kernel_main
+    call _fini
+    cli
 1:	hlt
-	jmp 1b
+    jmp 1b
 
 .size _start, . - _start
