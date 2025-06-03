@@ -8,5 +8,6 @@ PROJECTROOT=${PROJECTROOT:-"${TOOLSDIR}/.."}
 . $TOOLSDIR/config.sh
 
 $DOCKER_RUN $QEMU -vnc :1 -cdrom $NAME.iso
+sleep 0.5
 vncviewer localhost:5901 &> /dev/null
 docker kill $NAME &> /dev/null
