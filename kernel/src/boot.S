@@ -1,14 +1,27 @@
 .set ALIGN,    1<<0             /* align loaded modules on page boundaries */
 .set MEMINFO,  1<<1             /* provide memory map */
-.set FLAGS,    ALIGN | MEMINFO  /* this is the Multiboot 'flag' field */
+.set VIDEO,    1<<2
+.set FLAGS,    ALIGN | MEMINFO | VIDEO  /* this is the Multiboot 'flag' field */
 .set MAGIC,    0x1BADB002       /* 'magic number' lets bootloader find the header */
 .set CHECKSUM, -(MAGIC + FLAGS) /* checksum of above, to prove we are multiboot */
 
 .section .multiboot
 .align 4
+
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
+
+.long 0x00000000 /* header_addr */
+.long 0x00000000 /* load_addr */
+.long 0x00000000 /* load_end_addr */
+.long 0x00000000 /* bss_end_addr */
+.long 0x00000000 /* entry_addr */
+
+.long 0x00000001 /* mode_type */
+.long 0 /* width */
+.long 0 /* height */
+.long 0 /* depth */
 
 .section .bss
 .align 16
