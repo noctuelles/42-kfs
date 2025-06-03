@@ -90,7 +90,7 @@ __attribute__((section(".gdt"))) static gdt_entry_t gdt_entries[] = {
 };
 
 static const gdt_t gdt = {
-    .limit = sizeof(gdt_entries) - 1,
+    .limit        = sizeof(gdt_entries) - 1,
     .base_address = (uint32_t *)&gdt_entries,
 };
 
@@ -109,6 +109,6 @@ gdt_load() {
         "mov ax, 0x18\n"
         "mov ss, ax\n"
         "pop eax"
-        : : "m"(gdt)
-    );
+        :
+        : "m"(gdt));
 }
