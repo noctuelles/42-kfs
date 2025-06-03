@@ -112,6 +112,17 @@ static void print_multiboot(multiboot_info_t *mbi)
     }
 }
 
+static void print_stack(size_t count) {
+    uint32_t *esp;
+    
+    __asm__ volatile("mov %0, esp" : "=r"(esp));
+
+    printf("Stack contents at ESP: %p\n", esp);
+    for (size_t i = 0; i < count; i++) {
+        printf("[ESP + %d] = 0x%08x\n", i * 4, esp[i]);
+    }
+}
+
 static const char *
 readline(const char *prefix)
 {
@@ -217,6 +228,9 @@ void kernel_main(uint32_t magic, multiboot_info_t *mbi)
             else if (strcmp(command, "help") == 0)
             {
                 puts("switch - switch to another virtual terminal.");
+                puts("multiboot - show multiboot informations.");
+                puts("printstk - print kernel stack.");
+                puts("reboot - reboot the kernel.");
             }
             else if (strcmp(command, "multiboot") == 0)
             {
@@ -224,7 +238,7 @@ void kernel_main(uint32_t magic, multiboot_info_t *mbi)
             }
             else if (strcmp(command, "printstk") == 0)
             {
-
+                print_stack(15);
             }
             else if (strcmp(command, "exit") == 0)
             {
@@ -234,6 +248,7 @@ void kernel_main(uint32_t magic, multiboot_info_t *mbi)
             else if (strcmp(command, "reboot") == 0)
             {
                 puts("Rebooting...");
+
                 uint8_t good = 0x02;
                 while (good & 0x02)
                 {

@@ -5,12 +5,14 @@
 #include <stdint.h>
 
 #define GDT_MAX_ENTRIES 12
+#define GDT_BASE 0x00000800
 
 typedef enum segment_type_e {
-    SEGMENT_TYPE_DATA_READ_ONLY           = 0b0000,
-    SEGMENT_TYPE_DATA_READ_ONLY_ACCESSED  = 0b0001,
-    SEGMENT_TYPE_DATA_READ_WRITE          = 0b0010,
-    SEGMENT_TYPE_DATA_READ_WRITE_ACCESSED = 0b0011,
+    SEGMENT_TYPE_DATA_READ_ONLY              = 0b0000,
+    SEGMENT_TYPE_DATA_READ_ONLY_ACCESSED     = 0b0001,
+    SEGMENT_TYPE_DATA_READ_WRITE             = 0b0010,
+    SEGMENT_TYPE_DATA_READ_WRITE_EXPAND_DOWN = 0b0110,
+    SEGMENT_TYPE_DATA_READ_WRITE_ACCESSED    = 0b0011,
 
     SEGMENT_TYPE_CODE_EXECUTE_ONLY          = 0b1000,
     SEGMENT_TYPE_CODE_EXECUTE_ONLY_ACCESSED = 0b1001,
@@ -44,8 +46,8 @@ typedef struct gdt_entry_e {
 } __attribute__((packed)) gdt_entry_t;
 
 typedef struct gdt_e {
-    uint16_t limit;
-    gdt_entry_t *base_address;
+    uint16_t  limit;
+    uint32_t *base_address;
 } __attribute__((packed)) gdt_t;
 
 #endif

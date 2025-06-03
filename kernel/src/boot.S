@@ -35,10 +35,9 @@ stack_top:
 .type _start, @function
 
 _start:
-    mov ecx, eax
-
+    call gdt_load
     push ebx
-    push ecx
+    push eax
     call _init
     call kernel_main
     call _fini
